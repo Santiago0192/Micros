@@ -34,11 +34,14 @@ meter_font = Font(family="Tahoma",size=12,weight='normal')
 
 # Función para actualizar la posición del mapa
 def update_map_position(latitude, longitude):
+    #latitude = (float(str(latitude)[2:]))/60
+    #longitude = -1*(float(str(latitude)[2:]))/60 
     gmap_widget.set_position(latitude, longitude)
     marker_1.set_position(latitude, longitude)
 
 def update_battery_level(new_battery_level):
     global battery_level  # Usamos global para poder modificar la variable global dentro de la función
+    battery_level = battery_level/5.5
     battery_level = new_battery_level
     battery_bar['value'] = battery_level
     battery_label.config(text=f"Battery Level: {battery_level}%")
@@ -137,8 +140,8 @@ gmap_widget.set_zoom(30)
 
 import random
 
-def rpm_to_mps(rpm, radius):
-    return (2 * math.pi * radius * rpm) / 60
+def rpm_to_mps(rpm):
+    return (2 * math.pi * .025 * rpm) / 60
 
 def generar_array():
     registros = []
@@ -148,13 +151,20 @@ def generar_array():
 
     registros = [valor_1, valor_2, random.uniform(20.605, 20.600), random.uniform(-103.415, -103.420)]
 
+    #Ejemplo
+    '''103.41553295970421         #Longitud * -1
+    20.604852059341194,        #Latitud
+    550                        #Bateria
+    5                          #PWM'''
+
     return registros
 
 def update_values():
     #s = ser.readline().decode().strip()  # Leer datos del puerto serial
-    #valores_texto = s.split(',')
+    #valores_texto = s.split("\n")
     #print('valores_texto',valores_texto)
-    #arr = [float(valor) for valor in valores_texto]
+    #arr = [float(valor) for valor in valores_texto]4
+    # .replace(',', '')
     arr = generar_array()
     kmph = int(arr[0] * 30)
 
@@ -173,6 +183,7 @@ def update_values():
     print('Latitud: ', arr[2], ' Longitud:', arr[3])
     print('----------------------------')
 
+    print(lines[0])
     # Programar la próxima actualización después de 1000 ms (1 segundo)
     root.after(2000, update_values)
 
