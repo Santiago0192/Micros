@@ -24,7 +24,7 @@ x0,y0 = width/2,width/2
 min_speed,max_speed = 0,220
 step_speed = 20
 
-battery_level = 100
+battery = 101
 coordinates = "0, -0"
 
 root = Tk()
@@ -36,16 +36,12 @@ meter_font = Font(family="Tahoma",size=12,weight='normal')
 def update_map_position(latitude, longitude):
     #latitude = (float(str(latitude)[2:]))/60
     #longitude = -1*(float(str(latitude)[2:]))/60 
-    gmap_widget.set_position(latitude, longitude)
+    #gmap_widget.set_position(latitude, longitude)
     marker_1.set_position(latitude, longitude)
 
 def update_battery_level(new_battery_level):
-    global battery_level  # Usamos global para poder modificar la variable global dentro de la función
-    battery_level = battery_level/5.5
-    battery_level = new_battery_level
-    battery_bar['value'] = battery_level
-    battery_label.config(text=f"Battery Level: {battery_level}%")
-    root.after(1000, update_battery_level, new_battery_level)
+    battery_bar['value'] = new_battery_level
+    battery_label.config(text=f"Battery Level: {new_battery_level}%")
 
 def setTitles(): 
     root.title('Carrito')
@@ -107,7 +103,7 @@ class Meter(Canvas):
             y0-ray*math.cos(angle)*len1)
 
 #Batería
-battery_label = tk.Label(root, text=f"Porcentaje  de Bateria: {battery_level}%")
+battery_label = tk.Label(root, text=f"Porcentaje  de Bateria: {100}%")
 battery_label.pack(pady=5)
 
 battery_bar = ttk.Progressbar(root, orient='horizontal', length=200, mode='determinate')
@@ -133,8 +129,8 @@ gmap_widget.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 gmap_widget.pack(fill='both')
 
 # Inicialmente establece la posición del mapa
-initial_latitude = 48.860381
-initial_longitude = 2.338594
+initial_latitude = 20.6080566
+initial_longitude = -103.4172830
 marker_1 = gmap_widget.set_position(initial_latitude, initial_longitude, marker=True)  # Paris, France
 gmap_widget.set_zoom(30)
 
@@ -144,18 +140,13 @@ def rpm_to_mps(rpm):
     return (2 * math.pi * .025 * rpm) / 60
 
 def generar_array():
+    global battery
     registros = []
-    valor_1, valor_2 = 2,2
-    valor_1 = (valor_1 + 1) % 11
-    valor_2 = (valor_2 + 1) % 11
+    
+    valor_1 = 2
+    battery = (battery - 0.04)
 
-    registros = [valor_1, valor_2, random.uniform(20.605, 20.600), random.uniform(-103.415, -103.420)]
-
-    #Ejemplo
-    '''103.41553295970421         #Longitud * -1
-    20.604852059341194,        #Latitud
-    550                        #Bateria
-    5                          #PWM'''
+    registros = [valor_1, battery, random.uniform(20.6080566, 20.6080119), random.uniform(-103.4172830, -103.4171359)]
 
     return registros
 
@@ -174,8 +165,8 @@ def update_values():
     print('Velocidad: ',kmph,' m/s')
 
     # Actualizar los valores de la batería
-    new_battery_level = int(arr[1] * 30)
-    update_battery_level(new_battery_level)
+    new_battery_level = arr[1]
+    update_battery_level(int(new_battery_level))
     print('Bateria: ', new_battery_level)
 
     # Actualiza la posición del mapa a nuevas coordenadas
@@ -183,8 +174,6 @@ def update_values():
     print('Latitud: ', arr[2], ' Longitud:', arr[3])
     print('----------------------------')
 
-    print(lines[0])
-    # Programar la próxima actualización después de 1000 ms (1 segundo)
     root.after(2000, update_values)
 
 # Iniciar la primera actualización
